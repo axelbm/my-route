@@ -1,0 +1,36 @@
+# docker-compose.yml
+version: '2'
+
+services:
+  web:
+    build: .
+    
+    ports:
+      - "3001:3000"
+    links:
+      - influx
+    env_file: .env.local
+    environment: 
+      INFLUX_URL: http://influx:8086
+      PORT: 3000
+
+  influx:
+    image: influxdb:2.0
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2:/var/lib/influxdb2
+  
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3003:3000"
+    links:
+      - influx
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+
+volumes:
+  influxdb2:
+  grafana:
