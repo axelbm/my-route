@@ -24,8 +24,18 @@ export const Location = {};
  * @returns {Route[]}
  */
 export function read(path = ROUTES_PATH) {
-    const object = YAML.parse(fs.readFileSync(path, 'utf8'));
-    return object.routes;
+    try {
+        const object = YAML.parse(fs.readFileSync(path, 'utf8'));
+        return object.routes;
+    } catch (e) {
+        if (e.code == 'ENOENT') {
+            console.log('Routes file not found, creating new one')
+            fs.writeFileSync(path, YAML.stringify({ routes: [] }));
+            return [];
+        }
+
+        throw e;
+    }
 }
 
 /**
