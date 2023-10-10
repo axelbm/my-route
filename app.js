@@ -2,10 +2,12 @@ import express from 'express';
 import * as client from 'prom-client';
 import { PORT } from './config.js';
 import { getInfluxHealth } from './influx-connection.js';
-import { read } from './routes.js';
+import { read, write } from './routes.js';
 import asyncHandler from 'express-async-handler';
 
 const app = express();
+
+app.use(express.json());
 
 // logging
 app.use((req, res, next) => {
@@ -23,6 +25,27 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
+
+app.post('/routes', asyncHandler(async (req, res) => {
+    const route = {
+        name: req.body.name,
+        origin: req.body.origin,
+        destination: req.body.destination,
+    };
+
+    if (!route.name) throw new Error('name is required');
+    if (!route.origin) throw new Error('origin is required');
+    if (!route.destination) throw new Error('destination is required');
+    
+    write([route]);
+
+    res.json(route);
+}));
+
+app.get('/routes', asyncHandler(async (req, res) => {
+    const routes = read();
+    res.json(routes);
+}));
 
 // get metrics
 app.get('/metrics', asyncHandler(async (req, res) => {
