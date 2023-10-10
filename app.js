@@ -2,7 +2,7 @@ import express from 'express';
 import * as client from 'prom-client';
 import { PORT } from './config.js';
 import { getInfluxHealth } from './influx-connection.js';
-import { read, write } from './routes.js';
+import { append, read, write } from './routes.js';
 import asyncHandler from 'express-async-handler';
 
 const app = express();
@@ -37,7 +37,7 @@ app.post('/routes', asyncHandler(async (req, res) => {
     if (!route.origin) throw new Error('origin is required');
     if (!route.destination) throw new Error('destination is required');
     
-    write([route]);
+    append([route]);
 
     res.json(route);
 }));
